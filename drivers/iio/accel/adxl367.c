@@ -1654,13 +1654,13 @@ int adxl367_probe(struct device *dev, const struct adxl367_ops *ops,
 	if (ret)
 		return ret;
 
-	ret = devm_iio_triggered_buffer_setup_ext(dev, indio_dev, NULL,
-						  adxl367_trigger_handler,
-						  IIO_BUFFER_DIRECTION_IN,
-						  &adxl367_buffer_ops,
-						  adxl367_fifo_attributes);
+	ret = devm_iio_triggered_buffer_setup(dev, indio_dev, NULL,
+					      adxl367_trigger_handler,
+					      &adxl367_buffer_ops);
 	if (ret)
 		return ret;
+
+	iio_buffer_set_attrs(indio_dev->buffer, adxl367_fifo_attributes);
 
 	st->dready_trig = devm_iio_trigger_alloc(st->dev, "%s-dev%d",
 						 indio_dev->name,
