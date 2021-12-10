@@ -24,6 +24,10 @@
 #include "ad9739a.h"
 #include "cf_axi_dds.h"
 
+#define REG_DATA_CTRL 0x02
+#define REG_SETUP_HOLD 0x04
+#define REG_SMP 0x05
+
 struct ad9739a_platform_data {
 	bool mix_mode_en;
 	u32 fsc_ua;
@@ -365,8 +369,7 @@ static int ad9739a_probe(struct spi_device *spi)
 		goto out;
 	}
 
-	// comentez id = ad9739a_read(spi, REG_PART_ID);
-	pr_err("\n\n----------> part id = %d <----------\n\n", ad9739a_read(spi, 0x1F));
+	id = ad9739a_read(spi, REG_PART_ID);
 	/*
 	if (id != AD9739A_ID) {
 		ret = -ENODEV;
@@ -374,6 +377,11 @@ static int ad9739a_probe(struct spi_device *spi)
 		goto out;
 	}
 	*/
+	// bit 7 -> 0 = DAC input data is in 2's complement
+	//       -> 1 = DAC input data is in unsigned binary format
+	ad9739a_write(spi, REG_DATA_CTRL, 0x80);
+	ad9739a_write(spi, REG_SETUP_HOLD, 0x27);
+	ad9739a_write(spi, REG_SMP, 0x8); // 7 is the value from datasheet
 
 	conv->phy = phy;
 	conv->write = ad9739a_write;
